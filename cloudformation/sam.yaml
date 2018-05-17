@@ -36,3 +36,15 @@ Resources:
             Action: ['sts:AssumeRole']
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: ec2-permissions
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'ec2:DescribeRegions'
+                  - 'ec2:DescribeInstances'
+                  - 'ec2:StopInstances'
+                  - 'ec2:StartInstances'
+                Resource: '*'

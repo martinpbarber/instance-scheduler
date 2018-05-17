@@ -11,7 +11,7 @@ PKG_SRC_DIR := $(PKG_DIR)/src
 
 # All CloudFormation templates
 TEMPLATES := $(wildcard $(CFN_DIR)/*.yaml)
-SOURCES := $(wildcard $(SRC_DIR)/*.py)
+SOURCES := $(shell find $(SRC_DIR)/ -type f -name '*.py')
 TESTS := $(wildcard $(TESTS_DIR)/*.py)
 
 # CloudFormation template names
@@ -62,6 +62,9 @@ validate: $(TEMPLATES)
 # Run tests
 test: $(SOURCES) $(TESTS)
 	$(ACTIVATE) && python tests/test_schedule.py
+	$(ACTIVATE) && python tests/test_instance.py
+	$(ACTIVATE) && python tests/test_provider_aws.py
+	$(ACTIVATE) && python tests/test_repository_aws.py
 
 # Deploy the output template
 # Create a file so we know we have deployed the stack
@@ -71,7 +74,8 @@ $(PKG_CFN_DIR)/$(OUTPUT_STACK): $(PKG_CFN_DIR)/$(OUTPUT_TEMPLATE)
 
 # Package the SAM template
 $(PKG_CFN_DIR)/$(OUTPUT_TEMPLATE): $(PKG_CFN_DIR)/$(BUCKET_FILE) $(CFN_DIR)/$(SAM_TEMPLATE) $(SOURCES)
-	cp $(SOURCES) $(PKG_SRC_DIR)
+	cp -r $(SRC_DIR)/* $(PKG_SRC_DIR)
+	find $(PKG_SRC_DIR) -type d -name __pycache__ -exec rm -r {} \+
 	$(ACTIVATE) && pip install -r requirements.txt -t $(PKG_SRC_DIR)
 	rm -rf $(PKG_SRC_DIR)/*.dist-info
 	aws cloudformation package --region $(REGION) --template-file $(CFN_DIR)/$(SAM_TEMPLATE) --output-template-file $(PKG_CFN_DIR)/$(OUTPUT_TEMPLATE) --s3-bucket `cat $(PKG_CFN_DIR)/$(BUCKET_FILE)`
