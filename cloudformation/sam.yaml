@@ -1,0 +1,38 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Description: >-
+  AWS Instance Scheduler
+
+Resources:
+  LambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Process EC2 instance start/stop schedules
+      Handler: handler.run
+      Runtime: python3.6
+      MemorySize: 128
+      Timeout: 300
+      CodeUri: ../pkg/src
+      AutoPublishAlias: live
+      Role: !GetAtt LambdaRole.Arn
+      # Events:
+      #  Timer:
+      #    Type: schedule
+      #    Properties: cron(0/30 * * * ? *)
+      # events:
+      #  - schedule: cron(0/30 * * * ? *)
+
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: ['sts:AssumeRole']
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
