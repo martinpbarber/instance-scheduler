@@ -44,7 +44,7 @@ Resources:
                 Resource: '*'
 
   EventRule:
-    Type: "AWS::Events::Rule"
+    Type: AWS::Events::Rule
     Properties:
       Description: Execute EC2 instance scheduler
       ScheduleExpression: cron(0/30 * * * ? *)
@@ -54,7 +54,7 @@ Resources:
           Id: !Ref LambdaFunction
 
   LambdaPermission:
-    Type: 'AWS::Lambda::Permission'
+    Type: AWS::Lambda::Permission
     Properties:
       FunctionName: !GetAtt LambdaFunction.Arn
       Action: 'lambda:InvokeFunction'
@@ -62,7 +62,7 @@ Resources:
       SourceArn: !GetAtt EventRule.Arn
 
   LogGroup:
-    Type: "AWS::Logs::LogGroup"
+    Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub '/aws/lambda/${LambdaFunction}'
       RetentionInDays: 7
