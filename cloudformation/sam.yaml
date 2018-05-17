@@ -17,12 +17,6 @@ Resources:
       CodeUri: ../pkg/src
       AutoPublishAlias: live
       Role: !GetAtt LambdaRole.Arn
-      # Events:
-      #  Timer:
-      #    Type: schedule
-      #    Properties: cron(0/30 * * * ? *)
-      # events:
-      #  - schedule: cron(0/30 * * * ? *)
 
   LambdaRole:
     Type: AWS::IAM::Role
@@ -48,3 +42,21 @@ Resources:
                   - 'ec2:StopInstances'
                   - 'ec2:StartInstances'
                 Resource: '*'
+
+  EventRule:
+    Type: "AWS::Events::Rule"
+    Properties:
+      Description: Execute EC2 instance scheduler
+      ScheduleExpression: cron(0/30 * * * ? *)
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt LambdaFunction.Arn
+          Id: !Ref LambdaFunction
+
+  LambdaPermission:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      FunctionName: !GetAtt LambdaFunction.Arn
+      Action: 'lambda:InvokeFunction'
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt EventRule.Arn
